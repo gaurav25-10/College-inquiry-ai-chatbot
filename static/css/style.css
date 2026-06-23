@@ -1,0 +1,791 @@
+/*
+  ============================================================
+  style.css — The Complete Design System
+  ============================================================
+  WHAT IS CSS?
+  CSS (Cascading Style Sheets) controls how HTML elements LOOK.
+  If HTML is the skeleton, CSS is the skin, clothes, and makeup!
+  
+  KEY CONCEPTS:
+  - CSS Variables (--variable-name) : Reusable values (like color constants)
+  - Flexbox (display: flex)          : Modern layout system
+  - Animations (@keyframes)          : Moving/changing elements
+  - @media queries                   : Different styles for different screens
+  - Selectors (.class, #id, element) : How to target HTML elements
+  ============================================================
+*/
+
+/* ── GOOGLE FONTS IMPORT ───────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+/* ── CSS VARIABLES (Design Tokens) ─────────────────────── */
+/*
+  :root means "the entire document"
+  Variables let you define colors ONCE and reuse everywhere.
+  Change --primary and the whole theme changes!
+*/
+:root {
+  /* Color Palette */
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --accent: #f59e0b;
+  --accent-light: #fbbf24;
+  
+  /* Backgrounds */
+  --bg-dark: #0a0f1e;
+  --bg-card: #111827;
+  --bg-sidebar: #0d1526;
+  --bg-input: #1e2940;
+  --bg-message-user: #2563eb;
+  --bg-message-bot: #1a2744;
+  
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(59, 130, 246, 0.5);
+  
+  /* Sizes */
+  --sidebar-width: 280px;
+  --header-height: 70px;
+  --input-height: 80px;
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+  
+  /* Shadows */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px rgba(37, 99, 235, 0.2);
+  
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  
+  /* Transitions */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── RESET & BASE ────────────────────────────────────────── */
+/* 
+  * means "select ALL elements"
+  box-sizing: border-box makes padding/border included in width calculations
+*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden; /* Prevent page scroll — only chat scrolls */
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ── BACKGROUND DECORATION ──────────────────────────────── */
+.bg-decoration {
+  position: fixed; /* Stays in place even when scrolling */
+  inset: 0;        /* Shorthand for top/right/bottom/left: 0 */
+  pointer-events: none; /* Clicks pass through this element */
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Glowing circles in background */
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px); /* Makes them blurry/glowing */
+  opacity: 0.15;
+}
+
+.circle-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #2563eb, transparent);
+  top: -200px;
+  left: -100px;
+  animation: float1 8s ease-in-out infinite;
+}
+
+.circle-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #7c3aed, transparent);
+  bottom: -100px;
+  right: -50px;
+  animation: float2 10s ease-in-out infinite;
+}
+
+.circle-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #0891b2, transparent);
+  top: 50%;
+  left: 50%;
+  animation: float3 12s ease-in-out infinite;
+}
+
+/* Subtle grid pattern */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ── FLOATING ANIMATIONS ─────────────────────────────────── */
+/* @keyframes defines animation steps */
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(50px, 30px); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-40px, -20px); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-45%, -55%); }
+}
+
+/* ── APP CONTAINER ───────────────────────────────────────── */
+.app-container {
+  display: flex;        /* Flexbox: children side by side */
+  height: 100vh;        /* Full viewport height */
+  position: relative;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  padding: 0;
+  flex-shrink: 0;         /* Don't shrink when space is tight */
+  backdrop-filter: blur(20px); /* Frosted glass effect */
+  transition: var(--transition);
+}
+
+/* ── Sidebar Header ──────────────────────────────────────── */
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.1), transparent);
+}
+
+.college-logo {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(37,99,235,0.4);
+}
+
+.college-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.college-subtitle {
+  font-size: 11px;
+  color: var(--primary-light);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ── Sidebar Navigation ───────────────────────────────────── */
+.sidebar-nav {
+  flex: 1;               /* Take remaining space */
+  padding: 20px 16px;
+  overflow-y: auto;      /* Scroll if too many items */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 0 8px 8px;
+  margin-bottom: 4px;
+}
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  cursor: pointer;         /* Shows hand cursor on hover */
+  transition: var(--transition);
+  text-align: left;
+  width: 100%;
+}
+
+/* CSS :hover — styles applied when mouse is over element */
+.quick-btn:hover {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: var(--border-active);
+  color: var(--text-primary);
+  transform: translateX(4px); /* Slide right a bit */
+}
+
+.btn-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Sidebar Footer ──────────────────────────────────────── */
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clear-btn, .admin-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  font-size: 13px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none; /* Remove underline from links */
+}
+
+.clear-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.clear-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.admin-link {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: var(--accent);
+}
+
+.admin-link:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN CHAT CONTAINER
+   ══════════════════════════════════════════════════════════ */
+.chat-container {
+  flex: 1;                /* Take all remaining width */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 0;           /* Fix flex overflow issue */
+}
+
+/* ── Chat Header ─────────────────────────────────────────── */
+.chat-header {
+  height: var(--header-height);
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  backdrop-filter: blur(20px);
+  flex-shrink: 0; /* Don't shrink */
+}
+
+.menu-toggle {
+  display: none; /* Hidden on desktop, shown on mobile */
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.menu-toggle span {
+  width: 22px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.bot-avatar {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Green "online" dot */
+.status-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border-radius: 50%;
+  border: 2px solid var(--bg-dark);
+  animation: pulse 2s infinite; /* Pulsing animation */
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.header-subtitle {
+  font-size: 12px;
+  color: #22c55e;
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: var(--transition);
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ── Messages Area ────────────────────────────────────────── */
+.messages-area {
+  flex: 1;              /* Take remaining height */
+  overflow-y: auto;     /* Enable vertical scrolling */
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+/* Custom scrollbar styling */
+.messages-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messages-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ── Welcome Screen ──────────────────────────────────────── */
+.welcome-screen {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-animation {
+  text-align: center;
+  max-width: 520px;
+  padding: 40px 20px;
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary), var(--primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-subtitle {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+/* Quick start cards */
+.quick-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  gap: 12px;
+}
+
+.quick-card {
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 12px;
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.quick-card:hover {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: var(--primary);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.card-emoji {
+  font-size: 22px;
+}
+
+/* ── Message Bubbles ─────────────────────────────────────── */
+.message {
+  display: flex;
+  max-width: 80%;
+}
+
+/* User messages — aligned to the right */
+.user-message {
+  margin-left: auto; /* Push to right */
+  .message-content { width: 100%; }
+}
+
+.user-bubble {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 20px 20px 4px 20px; /* Rounded except bottom-right */
+  padding: 14px 18px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Bot messages — aligned to the left */
+.bot-message {
+  margin-right: auto;
+  max-width: 85%;
+}
+
+.bot-msg-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.bot-avatar-small {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.bot-bubble {
+  background: var(--bg-message-bot);
+  border: 1px solid var(--border);
+  border-radius: 4px 20px 20px 20px; /* Rounded except top-left */
+  padding: 14px 18px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+}
+
+.message-bubble p {
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.message-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  text-align: right;
+}
+
+/* ── Typing Indicator ─────────────────────────────────────── */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 12px;
+}
+
+.typing-avatar {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.typing-bubble {
+  background: var(--bg-message-bot);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 14px 20px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+/* Animated dots inside typing bubble */
+.typing-bubble span {
+  width: 7px;
+  height: 7px;
+  background: var(--primary-light);
+  border-radius: 50%;
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+/* Each dot has a different animation delay */
+.typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+.typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+
+.typing-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Input Area ───────────────────────────────────────────── */
+.input-area {
+  padding: 16px 24px 20px;
+  background: rgba(17, 24, 39, 0.95);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  flex-shrink: 0;
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 8px 8px 8px 18px;
+  transition: var(--transition);
+}
+
+/* When input is focused (user clicked on it) */
+.input-container:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.input-container textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  resize: none;           /* Disable manual resize */
+  padding: 6px 0;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+/* Placeholder text styling */
+.input-container textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.send-btn {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+
+.send-btn:active {
+  transform: scale(0.95); /* Slight press effect */
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.send-btn svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.input-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN (Mobile)
+   @media queries apply styles only when screen matches condition
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* On mobile, hide sidebar by default */
+  .sidebar {
+    position: fixed;  /* Overlay on top of content */
+    left: -100%;      /* Hidden off-screen to the left */
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  
+  /* When sidebar has 'open' class (added by JS), show it */
+  .sidebar.open {
+    left: 0;
+  }
+  
+  /* Show hamburger menu button on mobile */
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .messages-area {
+    padding: 16px;
+  }
+  
+  .message {
+    max-width: 95%;
+  }
+  
+  .welcome-title {
+    font-size: 20px;
+  }
+  
+  .quick-cards {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+  
+  .input-area {
+    padding: 12px 16px 16px;
+  }
+}

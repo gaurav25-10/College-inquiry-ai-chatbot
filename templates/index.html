@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  index.html — The Main Chatbot Page
+  ============================================================
+  WHAT IS HTML?
+  HTML (HyperText Markup Language) is the STRUCTURE of a webpage.
+  Think of HTML like the skeleton of a human body — it defines
+  what elements exist on the page.
+
+  KEY HTML CONCEPTS USED HERE:
+  - <div>       : A container/box to group elements
+  - <button>    : A clickable button
+  - <input>     : A text field where user types
+  - id="..."    : A unique name for an element (used by JavaScript)
+  - class="..." : A group name (used by CSS for styling)
+  
+  HOW THIS PAGE WORKS:
+  1. User types a message in the input box
+  2. JavaScript sends it to Flask (/chat route)
+  3. Flask gets AI response and sends back
+  4. JavaScript displays the response in the chat
+  ============================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎓 College AI Assistant</title>
+  
+  <!-- Google Fonts — for beautiful typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  
+  <!-- Our custom CSS file -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- ── BACKGROUND DECORATION ─────────────────────────── -->
+<div class="bg-decoration">
+  <div class="circle circle-1"></div>
+  <div class="circle circle-2"></div>
+  <div class="circle circle-3"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<!-- ── MAIN APP CONTAINER ──────────────────────────────── -->
+<div class="app-container">
+
+  <!-- ── SIDEBAR ───────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    
+    <!-- College Logo & Name -->
+    <div class="sidebar-header">
+      <div class="college-logo">
+        <span class="logo-icon">🎓</span>
+      </div>
+      <div class="college-name-container">
+        <h2 class="college-name">Uttarakhand Tech</h2>
+        <span class="college-subtitle">AI Inquiry System</span>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <nav class="sidebar-nav">
+      <p class="nav-label">Quick Questions</p>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('Tell me about courses offered')">
+        <span class="btn-icon">📚</span>
+        <span>Courses Offered</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('What is the admission process and last date?')">
+        <span class="btn-icon">📝</span>
+        <span>Admission Process</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('Show me the complete fee structure')">
+        <span class="btn-icon">💰</span>
+        <span>Fee Structure</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('What scholarship opportunities are available?')">
+        <span class="btn-icon">🏆</span>
+        <span>Scholarships</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('Tell me about placement records and companies')">
+        <span class="btn-icon">💼</span>
+        <span>Placements</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('What facilities does the college have?')">
+        <span class="btn-icon">🏫</span>
+        <span>Campus Facilities</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('Is hostel available? Tell me about hostel facilities')">
+        <span class="btn-icon">🏠</span>
+        <span>Hostel Info</span>
+      </button>
+      
+      <button class="quick-btn" onclick="sendQuickMessage('What documents are required for admission?')">
+        <span class="btn-icon">📋</span>
+        <span>Documents Required</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <button class="clear-btn" onclick="clearChat()">
+        <span>🗑️</span> Clear Chat
+      </button>
+      <a href="/admin" class="admin-link" target="_blank">
+        <span>⚙️</span> Admin Panel
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN CHAT AREA ─────────────────────────────────── -->
+  <main class="chat-container">
+    
+    <!-- Chat Header -->
+    <header class="chat-header">
+      <!-- Mobile menu button -->
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      
+      <div class="header-info">
+        <div class="bot-avatar">
+          <span>AI</span>
+          <div class="status-dot"></div>
+        </div>
+        <div>
+          <h1 class="header-title">College AI Assistant</h1>
+          <p class="header-subtitle" id="headerStatus">Online • Ready to help</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑️</button>
+      </div>
+    </header>
+
+    <!-- Messages Area -->
+    <div class="messages-area" id="messagesArea">
+      
+      <!-- Welcome Message (shown initially) -->
+      <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-animation">
+          <div class="welcome-icon">🎓</div>
+          <h2 class="welcome-title">Namaste! Welcome to Uttarakhand Institute</h2>
+          <p class="welcome-subtitle">I'm your AI-powered admission counselor. Ask me anything about admissions, courses, fees, placements, and more!</p>
+          
+          <!-- Quick start cards -->
+          <div class="quick-cards">
+            <div class="quick-card" onclick="sendQuickMessage('What courses are available for B.Tech?')">
+              <span class="card-emoji">📚</span>
+              <span>B.Tech Courses</span>
+            </div>
+            <div class="quick-card" onclick="sendQuickMessage('How to apply for admission?')">
+              <span class="card-emoji">📝</span>
+              <span>How to Apply</span>
+            </div>
+            <div class="quick-card" onclick="sendQuickMessage('What is the total fee for B.Tech CSE?')">
+              <span class="card-emoji">💰</span>
+              <span>Fee Details</span>
+            </div>
+            <div class="quick-card" onclick="sendQuickMessage('Tell me about the college and its achievements')">
+              <span class="card-emoji">🏆</span>
+              <span>About College</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Typing Indicator (hidden by default) -->
+    <div class="typing-indicator" id="typingIndicator" style="display:none">
+      <div class="typing-avatar">AI</div>
+      <div class="typing-bubble">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="typing-text">Thinking...</span>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="input-container">
+        <textarea 
+          id="messageInput" 
+          placeholder="Ask anything about admissions, courses, fees..." 
+          rows="1"
+          onkeydown="handleKeyPress(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Press Enter to send • Shift+Enter for new line</p>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── JAVASCRIPT ─────────────────────────────────────────
+  WHAT IS JAVASCRIPT?
+  JavaScript makes the page INTERACTIVE and DYNAMIC.
+  Without JS, HTML is just a static page you can only read.
+  With JS, you can click buttons, send messages, update content
+  without reloading the page!
+  
+  KEY CONCEPTS HERE:
+  - fetch()         : Makes HTTP requests to our Flask server
+  - async/await     : Waits for responses without freezing the page
+  - getElementById  : Finds an HTML element by its id
+  - innerHTML       : Sets the HTML content inside an element
+  ─────────────────────────────────────────────────────────────-->
+<script>
+// ── STATE ─────────────────────────────────────────────────
+// 'let' creates a variable that can change
+let isTyping = false;  // Is the bot currently "thinking"?
+
+// ── SEND MESSAGE ──────────────────────────────────────────
+/**
+ * This function runs when user clicks Send or presses Enter.
+ * It's like the main engine of the chatbot.
+ */
+async function sendMessage() {
+  // Get the input element and read its value
+  const input = document.getElementById("messageInput");
+  const message = input.value.trim(); // .trim() removes extra spaces
+  
+  // Don't send if empty or already waiting for response
+  if (!message || isTyping) return;
+  
+  // Clear the input field
+  input.value = "";
+  autoResize(input); // Reset height
+  
+  // Hide welcome screen (only visible on first message)
+  document.getElementById("welcomeScreen").style.display = "none";
+  
+  // Show user's message in chat
+  appendMessage("user", message);
+  
+  // Show typing animation
+  showTyping(true);
+  isTyping = true;
+  
+  // Update button state
+  document.getElementById("sendBtn").disabled = true;
+  
+  // ── FETCH API CALL ────────────────────────────────────
+  // This is how JavaScript talks to our Flask backend!
+  // fetch() sends a request to the URL and waits for response
+  try {
+    const response = await fetch("/chat", {  // URL of our Flask route
+      method: "POST",                         // POST = sending data
+      headers: {
+        "Content-Type": "application/json"   // Tell server we're sending JSON
+      },
+      body: JSON.stringify({ message: message }) // Convert to JSON string
+    });
+    
+    // Parse the JSON response from Flask
+    const data = await response.json();
+    
+    if (data.reply) {
+      appendMessage("bot", data.reply);
+    } else {
+      appendMessage("bot", "Sorry, I couldn't process that. Please try again!");
+    }
+    
+  } catch (error) {
+    // If there's an error (network, server down, etc.)
+    appendMessage("bot", "⚠️ Connection error. Please check your internet or try again.");
+    console.error("Error:", error); // Log to browser console for debugging
+  }
+  
+  // Reset state
+  showTyping(false);
+  isTyping = false;
+  document.getElementById("sendBtn").disabled = false;
+}
+
+// ── APPEND MESSAGE ────────────────────────────────────────
+/**
+ * Adds a message bubble to the chat area.
+ * @param {string} type - "user" or "bot"
+ * @param {string} text - The message content
+ */
+function appendMessage(type, text) {
+  const messagesArea = document.getElementById("messagesArea");
+  
+  // Create a new div element
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `message ${type}-message`;
+  
+  // Format the text (convert markdown-like formatting to HTML)
+  const formattedText = formatMessage(text);
+  
+  if (type === "user") {
+    messageDiv.innerHTML = `
+      <div class="message-content">
+        <div class="message-bubble user-bubble">
+          <p>${formattedText}</p>
+        </div>
+      </div>
+    `;
+  } else {
+    messageDiv.innerHTML = `
+      <div class="bot-msg-wrapper">
+        <div class="bot-avatar-small">AI</div>
+        <div class="message-bubble bot-bubble">
+          <p>${formattedText}</p>
+          <div class="message-time">${getCurrentTime()}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Add animation class
+  messageDiv.style.opacity = "0";
+  messageDiv.style.transform = "translateY(20px)";
+  messagesArea.appendChild(messageDiv);
+  
+  // Trigger animation
+  setTimeout(() => {
+    messageDiv.style.transition = "all 0.3s ease";
+    messageDiv.style.opacity = "1";
+    messageDiv.style.transform = "translateY(0)";
+  }, 10);
+  
+  // Scroll to bottom so new messages are visible
+  messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+// ── FORMAT MESSAGE ────────────────────────────────────────
+/**
+ * Converts basic text formatting to HTML.
+ * For example: **bold** becomes <strong>bold</strong>
+ */
+function formatMessage(text) {
+  // Escape HTML to prevent XSS attacks
+  text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  
+  // Convert **bold** to <strong>bold</strong>
+  text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  
+  // Convert newlines to <br> tags
+  text = text.replace(/\n/g, "<br>");
+  
+  // Convert numbered lists
+  text = text.replace(/^(\d+\.\s)/gm, "<br><b>$1</b>");
+  
+  // Convert bullet points
+  text = text.replace(/^[•\-]\s/gm, "<br>• ");
+  
+  return text;
+}
+
+// ── QUICK MESSAGE ─────────────────────────────────────────
+/**
+ * When user clicks a quick question button,
+ * this puts the text in input and sends it.
+ */
+function sendQuickMessage(text) {
+  const input = document.getElementById("messageInput");
+  input.value = text;
+  sendMessage();
+}
+
+// ── TYPING INDICATOR ──────────────────────────────────────
+function showTyping(show) {
+  const indicator = document.getElementById("typingIndicator");
+  indicator.style.display = show ? "flex" : "none";
+  
+  if (show) {
+    const messagesArea = document.getElementById("messagesArea");
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+}
+
+// ── CLEAR CHAT ────────────────────────────────────────────
+async function clearChat() {
+  await fetch("/clear_chat", { method: "POST" });
+  
+  const messagesArea = document.getElementById("messagesArea");
+  // Remove all messages except welcome screen
+  const messages = messagesArea.querySelectorAll(".message");
+  messages.forEach(m => m.remove());
+  
+  // Show welcome screen again
+  document.getElementById("welcomeScreen").style.display = "flex";
+}
+
+// ── KEYBOARD HANDLER ──────────────────────────────────────
+/**
+ * Handles keyboard shortcuts:
+ * - Enter: Send message
+ * - Shift+Enter: New line (don't send)
+ */
+function handleKeyPress(event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault(); // Stop default Enter behavior (new line)
+    sendMessage();
+  }
+}
+
+// ── AUTO RESIZE TEXTAREA ──────────────────────────────────
+/**
+ * Makes the input box grow taller as user types more text.
+ * CSS alone can't do this — we need JavaScript!
+ */
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 120) + "px";
+}
+
+// ── SIDEBAR TOGGLE (Mobile) ───────────────────────────────
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+// ── GET CURRENT TIME ──────────────────────────────────────
+function getCurrentTime() {
+  const now = new Date();
+  return now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── PAGE LOAD ─────────────────────────────────────────────
+// This runs when the page first loads
+document.addEventListener("DOMContentLoaded", function() {
+  // Focus on the input field automatically
+  document.getElementById("messageInput").focus();
+  
+  // Welcome message in console (for developers)
+  console.log("🎓 College Chatbot loaded successfully!");
+});
+</script>
+
+</body>
+</html>

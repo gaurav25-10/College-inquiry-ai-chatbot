@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Faculty — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary: #2563eb; --bg: #0a0f1e; --card: #111827; --sidebar-bg: #0d1526; --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-muted: #64748b; --text-secondary: #94a3b8; --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif; --sidebar-w: 250px; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    .admin-sidebar { width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 10; }
+    .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+    .brand-icon { font-size: 30px; margin-bottom: 8px; display: block; }
+    .brand-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); }
+    .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
+    .nav-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 8px 8px; margin-top: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; color: var(--text-secondary); text-decoration: none; border-radius: 8px; font-size: 14px; transition: all 0.2s; margin-bottom: 2px; }
+    .nav-item:hover, .nav-item.active { background: rgba(37,99,235,0.12); color: var(--text); }
+    .nav-item.active { color: #60a5fa; border-left: 3px solid #2563eb; }
+    .nav-icon { font-size: 18px; }
+    .sidebar-bottom { padding: 16px 12px; border-top: 1px solid var(--border); }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; color: #f87171; text-decoration: none; border-radius: 8px; font-size: 14px; background: rgba(239,68,68,0.05); }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+    .main-content { margin-left: var(--sidebar-w); flex: 1; }
+    .top-bar { background: rgba(17,24,39,0.95); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 5; }
+    .page-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .content-area { padding: 32px; }
+    .add-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .card-heading { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .form-group input, .form-group select { background: rgba(30,41,64,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: rgba(37,99,235,0.6); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .full { grid-column: 1 / -1; }
+    .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: linear-gradient(135deg,#2563eb,#1d4ed8); color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-danger { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+    .btn-edit { background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.25); color: #60a5fa; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .faculty-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .faculty-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: all 0.2s; }
+    .faculty-card:hover { border-color: rgba(37,99,235,0.3); }
+    .faculty-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+    .faculty-avatar { width: 48px; height: 48px; background: linear-gradient(135deg,#2563eb,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .faculty-info { flex: 1; }
+    .faculty-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .faculty-desig { font-size: 13px; color: #60a5fa; }
+    .faculty-actions { display: flex; gap: 6px; }
+    .faculty-details { display: flex; flex-direction: column; gap: 6px; }
+    .detail-row { display: flex; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+    .detail-label { color: var(--text-muted); min-width: 90px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #111827; border: 1px solid var(--border); border-radius: 20px; padding: 28px; width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    .modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .modal-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; font-size: 14px; z-index: 2000; transition: all 0.3s; transform: translateY(100px); opacity: 0; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(34,197,94,0.4); color: #86efac; }
+    .toast.error { border-color: rgba(239,68,68,0.4); color: #f87171; }
+    select option { background: #111827; }
+  </style>
+</head>
+<body>
+<aside class="admin-sidebar">
+  <div class="sidebar-brand"><span class="brand-icon">⚙️</span><div class="brand-name">Admin Panel</div><div class="brand-sub">College Chatbot Manager</div></div>
+  <nav class="sidebar-nav">
+    <p class="nav-section-label">Overview</p>
+    <a href="/admin/dashboard" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/admin/chat-history" class="nav-item"><span class="nav-icon">💬</span> Chat History</a>
+    <p class="nav-section-label">Database Management</p>
+    <a href="/admin/college-info" class="nav-item"><span class="nav-icon">🏫</span> College Info</a>
+    <a href="/admin/courses" class="nav-item"><span class="nav-icon">📚</span> Courses</a>
+    <a href="/admin/fees" class="nav-item"><span class="nav-icon">💰</span> Fee Structure</a>
+    <a href="/admin/faculty" class="nav-item active"><span class="nav-icon">👨‍🏫</span> Faculty</a>
+    <a href="/admin/faqs" class="nav-item"><span class="nav-icon">❓</span> FAQs</a>
+  </nav>
+  <div class="sidebar-bottom"><a href="/admin/logout" class="logout-btn"><span>🚪</span> Logout</a></div>
+</aside>
+
+<main class="main-content">
+  <div class="top-bar">
+    <h1 class="page-title">👨‍🏫 Manage Faculty</h1>
+    <span style="color:#64748b; font-size:13px;">{{ data|length }} faculty members</span>
+  </div>
+  <div class="content-area">
+
+    <!-- Add Faculty -->
+    <div class="add-card">
+      <h2 class="card-heading">➕ Add New Faculty Member</h2>
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name</label><input type="text" id="nName" placeholder="Dr. Priya Sharma"></div>
+        <div class="form-group"><label>Designation</label><input type="text" id="nDesig" placeholder="Professor / Assistant Professor"></div>
+        <div class="form-group"><label>Department</label><input type="text" id="nDept" placeholder="Computer Science"></div>
+        <div class="form-group"><label>Qualification</label><input type="text" id="nQual" placeholder="Ph.D (IIT Delhi)"></div>
+        <div class="form-group"><label>Experience (Years)</label><input type="number" id="nExp" placeholder="10"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="nEmail" placeholder="faculty@college.edu"></div>
+        <div class="form-group full"><label>Specialization</label><input type="text" id="nSpec" placeholder="Machine Learning, Databases"></div>
+      </div>
+      <button class="btn btn-primary" onclick="addFaculty()">➕ Add Faculty</button>
+    </div>
+
+    <!-- Faculty Grid -->
+    <div class="faculty-grid">
+      {% for f in data %}
+      <div class="faculty-card" id="faculty-{{ f['id'] }}">
+        <div class="faculty-top">
+          <div class="faculty-avatar">👨‍🏫</div>
+          <div class="faculty-info">
+            <div class="faculty-name">{{ f['name'] }}</div>
+            <div class="faculty-desig">{{ f['designation'] or 'Faculty' }}</div>
+          </div>
+          <div class="faculty-actions">
+            <button class="btn btn-edit btn-sm" onclick="openEdit({{ f['id'] }})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteFaculty({{ f['id'] }})">🗑️</button>
+          </div>
+        </div>
+        <div class="faculty-details">
+          {% if f['department'] %}<div class="detail-row"><span class="detail-label">Department:</span><span>{{ f['department'] }}</span></div>{% endif %}
+          {% if f['qualification'] %}<div class="detail-row"><span class="detail-label">Qualification:</span><span>{{ f['qualification'] }}</span></div>{% endif %}
+          {% if f['experience_years'] %}<div class="detail-row"><span class="detail-label">Experience:</span><span>{{ f['experience_years'] }} years</span></div>{% endif %}
+          {% if f['specialization'] %}<div class="detail-row"><span class="detail-label">Specialization:</span><span>{{ f['specialization'] }}</span></div>{% endif %}
+          {% if f['email'] %}<div class="detail-row"><span class="detail-label">Email:</span><span style="color:#60a5fa;">{{ f['email'] }}</span></div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2 class="modal-title">✏️ Edit Faculty</h2>
+    <input type="hidden" id="editId">
+    <div class="modal-form">
+      <div class="form-group full"><label>Full Name</label><input type="text" id="eName"></div>
+      <div class="form-group"><label>Designation</label><input type="text" id="eDesig"></div>
+      <div class="form-group"><label>Department</label><input type="text" id="eDept"></div>
+      <div class="form-group"><label>Qualification</label><input type="text" id="eQual"></div>
+      <div class="form-group"><label>Experience (Years)</label><input type="number" id="eExp"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="eEmail"></div>
+      <div class="form-group full"><label>Specialization</label><input type="text" id="eSpec"></div>
+      <div class="form-group"><label>Status</label><select id="eActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="background:rgba(255,255,255,0.05);color:#94a3b8;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFaculty()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✅ ':'❌ ') + msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className='toast', 3000);
+}
+
+async function addFaculty() {
+  const name = document.getElementById('nName').value.trim();
+  if (!name) { showToast('Name is required!', 'error'); return; }
+  const fields = {
+    name, designation: document.getElementById('nDesig').value,
+    department: document.getElementById('nDept').value,
+    qualification: document.getElementById('nQual').value,
+    experience_years: document.getElementById('nExp').value || 0,
+    email: document.getElementById('nEmail').value,
+    specialization: document.getElementById('nSpec').value,
+    is_active: 1
+  };
+  const res = await fetch('/admin/api/add', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({table:'faculty', fields}) });
+  const data = await res.json();
+  if (data.success) { showToast('Faculty added!'); setTimeout(() => location.reload(), 1000); }
+  else showToast(data.error || 'Failed', 'error');
+}
+
+async function openEdit(id) {
+  const res = await fetch(`/admin/api/get-record?table=faculty&id=${id}`);
+  const f = await res.json();
+  document.getElementById('editId').value = id;
+  document.getElementById('eName').value = f.name || '';
+  document.getElementById('eDesig').value = f.designation || '';
+  document.getElementById('eDept').value = f.department || '';
+  document.getElementById('eQual').value = f.qualification || '';
+  document.getElementById('eExp').value = f.experience_years || '';
+  document.getElementById('eEmail').value = f.email || '';
+  document.getElementById('eSpec').value = f.specialization || '';
+  document.getElementById('eActive').value = f.is_active;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+
+async function saveFaculty() {
+  const id = document.getElementById('editId').value;
+  const fields = {
+    name: document.getElementById('eName').value,
+    designation: document.getElementById('eDesig').value,
+    department: document.getElementById('eDept').value,
+    qualification: document.getElementById('eQual').value,
+    experience_years: document.getElementById('eExp').value,
+    email: document.getElementById('eEmail').value,
+    specialization: document.getElementById('eSpec').value,
+    is_active: document.getElementById('eActive').value,
+  };
+  const res = await fetch('/admin/api/update', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({table:'faculty', id, fields}) });
+  const data = await res.json();
+  if (data.success) { showToast('Updated!'); closeModal(); setTimeout(() => location.reload(), 1000); }
+  else showToast(data.error || 'Failed', 'error');
+}
+
+async function deleteFaculty(id) {
+  if (!confirm('Remove this faculty member?')) return;
+  const res = await fetch('/admin/api/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({table:'faculty', id}) });
+  const data = await res.json();
+  if (data.success) { document.getElementById(`faculty-${id}`).remove(); showToast('Removed!'); }
+  else showToast('Failed', 'error');
+}
+
+document.getElementById('editModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+</script>
+</body>
+</html>

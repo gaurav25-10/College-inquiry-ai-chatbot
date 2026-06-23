@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage FAQs — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563eb; --bg: #0a0f1e; --card: #111827; --sidebar-bg: #0d1526;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-muted: #64748b;
+      --text-secondary: #94a3b8; --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif; --sidebar-w: 250px;
+    }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    
+    /* Sidebar (same as dashboard) */
+    .admin-sidebar { width: var(--sidebar-w); background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 10; }
+    .sidebar-brand { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+    .brand-icon { font-size: 30px; margin-bottom: 8px; display: block; }
+    .brand-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); }
+    .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
+    .nav-section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0 8px 8px; margin-top: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; color: var(--text-secondary); text-decoration: none; border-radius: 8px; font-size: 14px; transition: all 0.2s; margin-bottom: 2px; }
+    .nav-item:hover, .nav-item.active { background: rgba(37,99,235,0.12); color: var(--text); }
+    .nav-item.active { color: #60a5fa; border-left: 3px solid #2563eb; }
+    .nav-icon { font-size: 18px; }
+    .sidebar-bottom { padding: 16px 12px; border-top: 1px solid var(--border); }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 10px 12px; color: #f87171; text-decoration: none; border-radius: 8px; font-size: 14px; transition: all 0.2s; background: rgba(239,68,68,0.05); }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+    
+    /* Main */
+    .main-content { margin-left: var(--sidebar-w); flex: 1; }
+    .top-bar { background: rgba(17,24,39,0.95); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 5; }
+    .page-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+    .content-area { padding: 32px; }
+
+    /* Add FAQ Card */
+    .add-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .card-heading { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .form-group input, .form-group textarea, .form-group select { background: rgba(30,41,64,0.8); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: all 0.2s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: rgba(37,99,235,0.6); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    /* Buttons */
+    .btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-family: var(--font-body); font-size: 14px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+    .btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-edit { background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.25); color: #60a5fa; }
+    .btn-edit:hover { background: rgba(37,99,235,0.22); }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+    /* FAQ List */
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; transition: all 0.2s; }
+    .faq-card:hover { border-color: rgba(37,99,235,0.3); }
+    .faq-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+    .faq-q { font-weight: 600; font-size: 15px; color: var(--text); flex: 1; }
+    .faq-a { color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+    .faq-meta { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    .badge { background: rgba(37,99,235,0.12); border: 1px solid rgba(37,99,235,0.2); color: #60a5fa; padding: 3px 10px; border-radius: 20px; font-size: 11px; }
+    .badge-inactive { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); color: #f87171; }
+    .faq-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* Edit Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #111827; border: 1px solid var(--border); border-radius: 20px; padding: 28px; width: 90%; max-width: 560px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    .modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; font-size: 14px; z-index: 2000; transition: all 0.3s; transform: translateY(100px); opacity: 0; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(34,197,94,0.4); color: #86efac; }
+    .toast.error { border-color: rgba(239,68,68,0.4); color: #f87171; }
+
+    select option { background: #111827; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="admin-sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">⚙️</span>
+    <div class="brand-name">Admin Panel</div>
+    <div class="brand-sub">College Chatbot Manager</div>
+  </div>
+  <nav class="sidebar-nav">
+    <p class="nav-section-label">Overview</p>
+    <a href="/admin/dashboard" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="/admin/chat-history" class="nav-item"><span class="nav-icon">💬</span> Chat History</a>
+    <p class="nav-section-label">Database Management</p>
+    <a href="/admin/college-info" class="nav-item"><span class="nav-icon">🏫</span> College Info</a>
+    <a href="/admin/courses" class="nav-item"><span class="nav-icon">📚</span> Courses</a>
+    <a href="/admin/fees" class="nav-item"><span class="nav-icon">💰</span> Fee Structure</a>
+    <a href="/admin/faculty" class="nav-item"><span class="nav-icon">👨‍🏫</span> Faculty</a>
+    <a href="/admin/faqs" class="nav-item active"><span class="nav-icon">❓</span> FAQs</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a href="/admin/logout" class="logout-btn"><span>🚪</span> Logout</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main-content">
+  <div class="top-bar">
+    <h1 class="page-title">❓ Manage FAQs</h1>
+    <span style="color:#64748b; font-size:13px;">{{ data|length }} FAQ entries</span>
+  </div>
+
+  <div class="content-area">
+    
+    <!-- Add New FAQ -->
+    <div class="add-card">
+      <h2 class="card-heading">➕ Add New FAQ</h2>
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label>Question</label>
+          <input type="text" id="newQuestion" placeholder="e.g. What is the last date to apply?">
+        </div>
+        <div class="form-group full-width">
+          <label>Answer</label>
+          <textarea id="newAnswer" placeholder="Write a clear, helpful answer here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="newCategory">
+            <option value="general">General</option>
+            <option value="admission">Admission</option>
+            <option value="fees">Fees</option>
+            <option value="courses">Courses</option>
+            <option value="facilities">Facilities</option>
+            <option value="placement">Placement</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="addFAQ()">➕ Add FAQ</button>
+    </div>
+
+    <!-- FAQ List -->
+    <div class="faq-list">
+      {% for faq in data %}
+      <div class="faq-card" id="faq-{{ faq['id'] }}">
+        <div class="faq-header">
+          <div class="faq-q">Q: {{ faq['question'] }}</div>
+          <div class="faq-actions">
+            <button class="btn btn-edit btn-sm" onclick="openEditModal({{ faq['id'] }}, `{{ faq['question']|replace('`', "'") }}`, `{{ faq['answer']|replace('`', "'") }}`, '{{ faq['category'] }}', {{ faq['is_active'] }})">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteFAQ({{ faq['id'] }})">🗑️</button>
+          </div>
+        </div>
+        <div class="faq-a">A: {{ faq['answer'] }}</div>
+        <div class="faq-meta">
+          <span class="badge">{{ faq['category'] }}</span>
+          {% if not faq['is_active'] %}<span class="badge badge-inactive">Inactive</span>{% endif %}
+          <span style="font-size:11px; color:#475569;">Updated: {{ faq['last_updated'][:10] }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</main>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2 class="modal-title">✏️ Edit FAQ</h2>
+    <input type="hidden" id="editId">
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div class="form-group">
+        <label>Question</label>
+        <input type="text" id="editQuestion">
+      </div>
+      <div class="form-group">
+        <label>Answer</label>
+        <textarea id="editAnswer" style="min-height:100px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="editCategory">
+          <option value="general">General</option>
+          <option value="admission">Admission</option>
+          <option value="fees">Fees</option>
+          <option value="courses">Courses</option>
+          <option value="facilities">Facilities</option>
+          <option value="placement">Placement</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="editActive">
+          <option value="1">Active</option>
+          <option value="0">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="background:rgba(255,255,255,0.05); color:#94a3b8;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFAQ()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+async function addFAQ() {
+  const q = document.getElementById('newQuestion').value.trim();
+  const a = document.getElementById('newAnswer').value.trim();
+  const cat = document.getElementById('newCategory').value;
+  
+  if (!q || !a) { showToast('Question and answer are required!', 'error'); return; }
+  
+  const res = await fetch('/admin/api/add', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ table: 'faqs', fields: { question: q, answer: a, category: cat, is_active: 1 } })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    showToast('FAQ added successfully!');
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    showToast(data.error || 'Failed to add', 'error');
+  }
+}
+
+function openEditModal(id, q, a, cat, active) {
+  document.getElementById('editId').value = id;
+  document.getElementById('editQuestion').value = q;
+  document.getElementById('editAnswer').value = a;
+  document.getElementById('editCategory').value = cat;
+  document.getElementById('editActive').value = active;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
+async function saveFAQ() {
+  const id = document.getElementById('editId').value;
+  const fields = {
+    question: document.getElementById('editQuestion').value,
+    answer: document.getElementById('editAnswer').value,
+    category: document.getElementById('editCategory').value,
+    is_active: document.getElementById('editActive').value,
+  };
+  
+  const res = await fetch('/admin/api/update', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ table: 'faqs', id: id, fields: fields })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    showToast('FAQ updated!');
+    closeModal();
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    showToast(data.error || 'Failed', 'error');
+  }
+}
+
+async function deleteFAQ(id) {
+  if (!confirm('Delete this FAQ? The chatbot will no longer use it.')) return;
+  
+  const res = await fetch('/admin/api/delete', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ table: 'faqs', id: id })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    document.getElementById(`faq-${id}`).remove();
+    showToast('FAQ deleted!');
+  } else {
+    showToast('Failed to delete', 'error');
+  }
+}
+
+// Close modal when clicking outside
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

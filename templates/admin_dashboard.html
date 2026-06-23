@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — College Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #2563eb;
+      --bg: #0a0f1e;
+      --card: #111827;
+      --sidebar-bg: #0d1526;
+      --border: rgba(255,255,255,0.08);
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+      --text-secondary: #94a3b8;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --sidebar-w: 250px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── ADMIN SIDEBAR ──────────────────────────── */
+    .admin-sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 10;
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 0 8px 8px;
+      margin-top: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(37,99,235,0.12);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      color: #60a5fa;
+      border-left: 3px solid #2563eb;
+    }
+
+    .nav-icon { font-size: 18px; }
+
+    .sidebar-bottom {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      color: #f87171;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: rgba(239,68,68,0.05);
+    }
+
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+    /* ── MAIN CONTENT ───────────────────────────── */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: rgba(17,24,39,0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .admin-badge {
+      background: rgba(37,99,235,0.15);
+      border: 1px solid rgba(37,99,235,0.3);
+      color: #60a5fa;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .content-area {
+      padding: 32px;
+      flex: 1;
+    }
+
+    /* ── STATS GRID ─────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(37,99,235,0.4);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── MANAGEMENT CARDS ───────────────────────── */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .management-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .mgmt-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.3s;
+      display: block;
+    }
+
+    .mgmt-card:hover {
+      border-color: rgba(37,99,235,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .mgmt-icon {
+      font-size: 32px;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .mgmt-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .mgmt-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── RECENT CHATS ───────────────────────────── */
+    .chats-table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: rgba(255,255,255,0.03);
+      padding: 12px 20px;
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    td {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .msg-cell {
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis; /* Shows "..." when text is too long */
+    }
+
+    .time-badge {
+      background: rgba(255,255,255,0.05);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .view-all-btn {
+      background: rgba(37,99,235,0.1);
+      border: 1px solid rgba(37,99,235,0.2);
+      color: #60a5fa;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .view-all-btn:hover { background: rgba(37,99,235,0.2); }
+
+    /* ── CHATBOT LINK BANNER ────────────────────── */
+    .banner {
+      background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(124,58,237,0.08));
+      border: 1px solid rgba(37,99,235,0.25);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .banner-text h3 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .banner-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .banner-btn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .banner-btn:hover { transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+
+<!-- ── ADMIN SIDEBAR ─────────────────────────────────────── -->
+<aside class="admin-sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">⚙️</span>
+    <div class="brand-name">Admin Panel</div>
+    <div class="brand-sub">College Chatbot Manager</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <p class="nav-section-label">Overview</p>
+    <a href="/admin/dashboard" class="nav-item active">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a href="/admin/chat-history" class="nav-item">
+      <span class="nav-icon">💬</span> Chat History
+    </a>
+
+    <p class="nav-section-label">Database Management</p>
+    <a href="/admin/college-info" class="nav-item">
+      <span class="nav-icon">🏫</span> College Info
+    </a>
+    <a href="/admin/courses" class="nav-item">
+      <span class="nav-icon">📚</span> Courses
+    </a>
+    <a href="/admin/fees" class="nav-item">
+      <span class="nav-icon">💰</span> Fee Structure
+    </a>
+    <a href="/admin/faculty" class="nav-item">
+      <span class="nav-icon">👨‍🏫</span> Faculty
+    </a>
+    <a href="/admin/faqs" class="nav-item">
+      <span class="nav-icon">❓</span> FAQs
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a href="/admin/logout" class="logout-btn">
+      <span>🚪</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN CONTENT ──────────────────────────────────────── -->
+<main class="main-content">
+  
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <h1 class="page-title">Dashboard</h1>
+    <span class="admin-badge">👤 Admin: {{ session.get('admin_username', 'admin') }}</span>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Banner -->
+    <div class="banner">
+      <div class="banner-text">
+        <h3>🤖 Your Chatbot is Live!</h3>
+        <p>The AI chatbot is running and ready to answer student queries.</p>
+      </div>
+      <a href="/" target="_blank" class="banner-btn">Open Chatbot →</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-icon">💬</span>
+        <div class="stat-value">{{ stats.total_chats }}</div>
+        <div class="stat-label">Total Conversations</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📅</span>
+        <div class="stat-value">{{ stats.today_chats }}</div>
+        <div class="stat-label">Today's Chats</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📚</span>
+        <div class="stat-value">{{ stats.total_courses }}</div>
+        <div class="stat-label">Active Courses</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">👨‍🏫</span>
+        <div class="stat-value">{{ stats.total_faculty }}</div>
+        <div class="stat-label">Faculty Members</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">❓</span>
+        <div class="stat-value">{{ stats.total_faqs }}</div>
+        <div class="stat-label">FAQ Entries</div>
+      </div>
+    </div>
+
+    <!-- Management Cards -->
+    <h2 class="section-title">📂 Database Management</h2>
+    <div class="management-grid">
+      <a href="/admin/college-info" class="mgmt-card">
+        <span class="mgmt-icon">🏫</span>
+        <div class="mgmt-title">College Information</div>
+        <div class="mgmt-desc">Update college name, contact, location, achievements, and general details</div>
+      </a>
+      <a href="/admin/courses" class="mgmt-card">
+        <span class="mgmt-icon">📚</span>
+        <div class="mgmt-title">Courses</div>
+        <div class="mgmt-desc">Add/edit/remove courses, eligibility criteria, seats, and descriptions</div>
+      </a>
+      <a href="/admin/fees" class="mgmt-card">
+        <span class="mgmt-icon">💰</span>
+        <div class="mgmt-title">Fee Structure</div>
+        <div class="mgmt-desc">Update annual fees, semester fees, and scholarship information</div>
+      </a>
+      <a href="/admin/faculty" class="mgmt-card">
+        <span class="mgmt-icon">👨‍🏫</span>
+        <div class="mgmt-title">Faculty</div>
+        <div class="mgmt-desc">Manage faculty profiles, departments, qualifications</div>
+      </a>
+      <a href="/admin/faqs" class="mgmt-card">
+        <span class="mgmt-icon">❓</span>
+        <div class="mgmt-title">FAQs</div>
+        <div class="mgmt-desc">Add common questions and answers that the chatbot will learn from</div>
+      </a>
+      <a href="/admin/chat-history" class="mgmt-card">
+        <span class="mgmt-icon">📊</span>
+        <div class="mgmt-title">Chat Analytics</div>
+        <div class="mgmt-desc">View all conversations to understand what students are asking</div>
+      </a>
+    </div>
+
+    <!-- Recent Chats -->
+    <h2 class="section-title">💬 Recent Conversations</h2>
+    <div class="chats-table-wrapper">
+      <div class="table-header">
+        <span style="font-size:14px; color:#94a3b8;">Last 10 chats</span>
+        <a href="/admin/chat-history" class="view-all-btn">View All →</a>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Student's Question</th>
+            <th>Bot's Response</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if recent_chats %}
+            {% for chat in recent_chats %}
+            <tr>
+              <td class="msg-cell">{{ chat['user_message'][:80] }}...</td>
+              <td class="msg-cell">{{ chat['bot_response'][:80] }}...</td>
+              <td><span class="time-badge">{{ chat['timestamp'][:16] }}</span></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="3" style="text-align:center; color:#64748b; padding:30px;">
+                No conversations yet. Share the chatbot link with students!
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
